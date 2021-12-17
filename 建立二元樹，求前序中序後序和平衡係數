@@ -1,0 +1,151 @@
+#include<iostream>
+#include<string>
+#include<sstream>
+#include<math.h>
+using namespace std;
+struct tree {
+	string A;
+	tree* llink;
+	tree* rlink;
+};
+tree* root = NULL;
+tree* current1 = nullptr;
+tree* current2 = nullptr;
+int count1 = 0;
+int count2 = 0;
+int max1 = 0;
+int max2 = 0;
+tree* find(tree* tempcurrent, string B) {
+	if (tempcurrent == NULL) {
+		return nullptr;
+	}
+	else if (tempcurrent->A != B) {
+		current1 = find(tempcurrent->llink, B);
+		if (current1 != nullptr) {
+			return current1;
+		}
+		current2 = find(tempcurrent->rlink, B);
+		if (current2 != nullptr) {
+			return current2;
+		}
+	}
+	else {
+		return tempcurrent;
+	}
+	return nullptr;
+}
+void preorder(tree* ptr) { /*前序走訪*/
+	if (ptr) {
+		cout << ptr->A << ' ';
+		preorder(ptr->llink);
+		preorder(ptr->rlink);
+	}
+}
+void inorder(tree* ptr) {
+	if (ptr) {
+		inorder(ptr->llink);
+		cout << ptr->A << ' ';
+		inorder(ptr->rlink);
+	}
+}
+void postorder(tree* ptr) {
+	if (ptr) {
+		postorder(ptr->llink);
+		postorder(ptr->rlink);
+		cout << ptr->A << ' ';
+	}
+}
+void standardl(tree* left) {
+	count1++;
+	if (left) {
+		standardl(left->llink);
+		standardl(left->rlink);
+	}
+	else {
+		if (max1 < count1) {
+			max1 = count1;
+		}
+	}
+	count1--;
+}
+void standard2(tree* right) {
+	count2++;
+	if (right) {
+		standard2(right->llink);
+		standard2(right->rlink);
+	}
+	else {
+		if (max2 < count2) {
+			max2 = count2;
+		}
+	}
+	count2--;
+}
+int main() {
+	string str;
+	tree* current = NULL;
+	bool first = false;
+	while (getline(cin, str) && str != "0") {
+		stringstream ss;
+		ss << str;
+		bool test = false;
+		while (ss >> str) {
+			if (first == false) {
+				tree* ptr = new tree;
+				ptr->A = str;
+				ptr->llink = NULL;
+				ptr->rlink = NULL;
+				root = ptr;
+				first = true;
+			}
+			else if (root->llink == NULL || root->rlink == NULL) {
+				tree* ptr = new tree;
+				ptr->A = str;
+				if ((ptr->A[2] - '0') % 2 == 1) {
+					root->llink = ptr;
+					ptr->llink = NULL;
+					ptr->rlink = NULL;
+				}
+				else {
+					root->rlink = ptr;
+					ptr->llink = NULL;
+					ptr->rlink = NULL;
+				}
+			}
+			else {
+				if (test == false) {
+					current1 = nullptr;
+					current2 = nullptr;
+					current = find(root, str); // 第一步會先找到，之後二三步不用考慮
+					test = true;
+				}
+				else if ((str[2] - '0') % 2 == 1) {
+					tree* ptr = new tree;
+					ptr->A = str;
+					current->llink = ptr;
+					ptr->llink = NULL;
+					ptr->rlink = NULL;
+				}
+				else if ((str[2] - '0') % 2 == 0) {
+					tree* ptr = new tree;
+					ptr->A = str;
+					current->rlink = ptr;
+					ptr->llink = NULL;
+					ptr->rlink = NULL;
+				}
+			}
+		}
+	}
+	cout << "Preorder: ";
+	preorder(root);
+	cout << endl;
+	cout << "Inorder: ";
+	inorder(root);
+	cout << endl;
+	cout << "Postorder: ";
+	postorder(root);
+	cout << endl;
+	standardl(root->llink);
+	standard2(root->rlink);
+	cout << "The balance factor is " << abs(max1 - max2) << endl;
+}
